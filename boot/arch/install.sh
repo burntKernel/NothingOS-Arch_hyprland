@@ -30,8 +30,10 @@ command -v pacman >/dev/null || { echo "pacman is required" >&2; exit 1; }
 SUDO=""
 if (( BOOT_ONLY )); then
   [[ $EUID -eq 0 ]] || { echo "run --boot-only with sudo" >&2; exit 1; }
-elif (( INSTALL_PACKAGES || INSTALL_BOOT )); then
-  if (( EUID != 0 )); then
+else
+  # The AUR helper and the user configuration must run as the desktop user, not root.
+  (( EUID != 0 )) || { echo "run as your normal user; the script calls sudo where needed" >&2; exit 1; }
+  if (( INSTALL_PACKAGES || INSTALL_BOOT )); then
     SUDO=sudo
     command -v sudo >/dev/null || { echo "sudo is required" >&2; exit 1; }
   fi
@@ -109,7 +111,17 @@ CONF
   echo "== Plymouth"
   rm -rf /usr/share/plymouth/themes/nothing
   cp -r "$boot/plymouth/nothing" /usr/share/plymouth/themes/nothing
+  # The hook's place in HOOKS depends on the system (encryption, systemd vs udev), so it is not added here.
+  if ! grep -qs '^HOOKS=.*\bplymouth\b' /etc/mkinitcpio.conf /etc/mkinitcpio.conf.d/*.conf; then
+    echo "   warning: add plymouth to HOOKS in /etc/mkinitcpio.conf (after systemd or udev, before" >&2
+    echo "   encrypt/sd-encrypt), then run: sudo mkinitcpio -P. Without it the splash never shows." >&2
+  fi
   plymouth-set-default-theme -R nothing
+
+  if (( ! GRUB )); then
+    echo "   Plymouth needs \"quiet splash\" on the kernel command line; use --grub for GRUB,"
+    echo "   or add it to your boot loader's entries (systemd-boot, Limine, ...) yourself."
+  fi
 
   if (( GRUB )); then
     echo "== GRUB"

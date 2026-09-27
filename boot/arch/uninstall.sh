@@ -15,8 +15,12 @@ if [[ -d /usr/share/plymouth/themes/nothing ]]; then
 fi
 
 if [[ -f /etc/default/grub.nothing-arch.bak ]]; then
-  mv /etc/default/grub.nothing-arch.bak /etc/default/grub
-  grub-mkconfig -o /boot/grub/grub.cfg || echo "warning: grub-mkconfig failed; restoring the rest anyway" >&2
+  cp -a /etc/default/grub.nothing-arch.bak /etc/default/grub
+  if grub-mkconfig -o /boot/grub/grub.cfg; then
+    rm -f /etc/default/grub.nothing-arch.bak
+  else
+    echo "warning: grub-mkconfig failed; backup kept at /etc/default/grub.nothing-arch.bak" >&2
+  fi
 fi
 
 if [[ -d $state ]]; then
