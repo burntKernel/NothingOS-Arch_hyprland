@@ -72,7 +72,7 @@ Options:
 
 ```sh
 bash boot/arch/install.sh --no-boot  # desktop configuration only
-bash boot/arch/install.sh --no-aur   # skip automatic AUR Quickshell installation
+bash boot/arch/install.sh --no-aur   # skip the AUR packages (quickshell-git, wallust)
 bash boot/arch/install.sh --grub     # also update GRUB after reviewing /etc/default/grub
 sudo bash boot/arch/uninstall.sh     # remove SDDM/Plymouth integration
 ```
@@ -92,8 +92,8 @@ bash patches/apply.sh
 The Fedora boot integration is optional and requires `sudo`:
 
 ```sh
-sudo bash boot/fedora/install.sh
-sudo bash boot/fedora/uninstall.sh  # revert it later
+sudo ~/.local/share/nothing-boot/fedora/install.sh
+sudo ~/.local/share/nothing-boot/fedora/uninstall.sh  # revert it later
 ```
 
 The installers back up replaced user files in `~/.config/nothing-dotfiles-backup/`.

@@ -16,7 +16,7 @@ fi
 
 if [[ -f /etc/default/grub.nothing-arch.bak ]]; then
   mv /etc/default/grub.nothing-arch.bak /etc/default/grub
-  grub-mkconfig -o /boot/grub/grub.cfg
+  grub-mkconfig -o /boot/grub/grub.cfg || echo "warning: grub-mkconfig failed; restoring the rest anyway" >&2
 fi
 
 if [[ -d $state ]]; then

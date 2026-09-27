@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Install the Arch Linux dependencies, Nothing configuration, and optional boot integration.
-# Run this script on Arch Linux, not on Windows.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -40,7 +39,8 @@ fi
 
 packages=(
   hyprland hypridle hyprlock hyprsunset awww rofi swaync kitty
-  brightnessctl wireplumber pavucontrol blueman nvtop python python-pillow
+  brightnessctl wireplumber pavucontrol blueman python python-pillow
+  wf-recorder hyprpicker grim slurp imagemagick cava
   starship fastfetch btop yazi kvantum qt5ct qt6ct adw-gtk-theme
   xdg-desktop-portal-hyprland polkit-kde-agent
 )
@@ -78,6 +78,15 @@ install_boot() {
   rm -rf /usr/share/sddm/themes/nothing
   cp -r "$boot/sddm/nothing" /usr/share/sddm/themes/nothing
   rm -f /usr/share/sddm/themes/nothing/preview.qml
+  # The greeter runs as the sddm user; its fonts come from the staging copy made by the root install.sh.
+  local fonts
+  fonts="$(getent passwd "${SUDO_USER:-root}" | cut -d: -f6)/.local/share/nothing-boot/sddm/nothing/fonts"
+  if [[ -d $fonts ]]; then
+    mkdir -p /usr/share/sddm/themes/nothing/fonts
+    cp -r "$fonts"/. /usr/share/sddm/themes/nothing/fonts/
+  else
+    echo "   no fonts in $fonts; the greeter will use fallback fonts" >&2
+  fi
   chmod -R a+rX /usr/share/sddm/themes/nothing
   mkdir -p /etc/sddm.conf.d
   cat > /etc/sddm.conf.d/zz-nothing.conf <<'CONF'
