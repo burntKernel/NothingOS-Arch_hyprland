@@ -38,6 +38,32 @@ Singleton {
     readonly property int osdMarginBottom: 90
     readonly property string backlightDevice: "intel_backlight"
 
+    // Glyph lights (GlyphService.qml): strip thickness, distance from the edge, how far the glow
+    // spills in, room left at the corners, and the gap in the top strips for the bar (logical px).
+    // Empty glyphScreens = every screen.
+    readonly property int glyphThickness: 4
+    readonly property int glyphInset: 3
+    readonly property int glyphGlow: 36
+    readonly property int glyphCornerGap: 48
+    readonly property int glyphTopGap: 640
+    readonly property list<string> glyphScreens: []
+
+    // Notification pattern per app, matched on the app name (lowercase; a substring also matches).
+    // Patterns: pulse, double, chase, breathe, rise, sparkle, or none. Critical notifications always
+    // pulse red. Try one with: qs ipc -c nothing call glyph play chase
+    readonly property var glyphPatterns: ({
+            "discord": "chase",
+            "vesktop": "chase",
+            "whatsapp": "double",
+            "telegram": "double",
+            "signal": "double",
+            "thunderbird": "rise",
+            "zen": "breathe",
+            "firefox": "breathe",
+            "spotify": "none",
+            "default": "pulse"
+        })
+
     // Click actions (run through sh, so $HOME works)
     readonly property string wifiMenu: "$HOME/.config/waybar/scripts/rofi-wifi.sh"
     readonly property string mixer: "pavucontrol"
@@ -45,4 +71,12 @@ Singleton {
     readonly property string nightLight: "$HOME/.config/hypr/scripts/Hyprsunset.sh"
     readonly property string lockCommand: "$HOME/.config/hypr/scripts/LockScreen.sh"
     readonly property string powerMenu: "$HOME/.config/hypr/scripts/Wlogout.sh"
+    // KooL's screenshot script: --area for a selection, --now for the whole screen
+    readonly property string screenshotCommand: "$HOME/.config/hypr/scripts/ScreenShot.sh"
+    // hyprpicker copies the colour itself; this adds a notification with a swatch of it
+    readonly property string colorPickerCommand: "hex=$(hyprpicker -a -f hex) && [ -n \"$hex\" ] && swatch=\"${XDG_RUNTIME_DIR:-/tmp}/nothing-swatch.png\" && { magick -size 64x64 \"xc:$hex\" \"$swatch\" 2>/dev/null || swatch=color-select; } && notify-send -a 'Colour picker' -i \"$swatch\" \"$hex\" 'Copied to the clipboard'"
+
+    // Screen recorder (wf-recorder). Desktop audio comes from the current output's monitor.
+    readonly property string recordingsDir: "$HOME/Videos/Recordings"
+    readonly property bool recordAudio: true
 }

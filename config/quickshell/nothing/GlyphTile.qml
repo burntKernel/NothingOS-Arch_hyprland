@@ -1,31 +1,32 @@
 import QtQuick
 
-// Caffeine: keep the screen awake. Sets ShellState.caffeine, which enables the idle inhibitor in Bar.qml.
+// Glyph lights switch for the control center, styled like the phone remote tile. Click toggles the lights;
+// right-click toggles music mode, shown as "· MUSIC" after the label.
 Rectangle {
     id: root
 
-    readonly property bool active: ShellState.caffeine
+    readonly property bool active: GlyphService.enabled
 
     implicitHeight: 44
     radius: Theme.radiusCard
     color: Theme.surface
 
     Text {
-        id: cup
+        id: bulb
         anchors.left: parent.left
         anchors.leftMargin: Theme.gapM
         anchors.verticalCenter: parent.verticalCenter
-        text: Icons.coffee
+        text: Icons.glyphLights
         color: root.active ? Theme.text : Theme.textDim
         font.family: Theme.fontIcon
         font.pixelSize: 15
     }
 
     Text {
-        anchors.left: cup.right
+        anchors.left: bulb.right
         anchors.leftMargin: Theme.gapS
         anchors.verticalCenter: parent.verticalCenter
-        text: "CAFFEINE"
+        text: GlyphService.musicMode ? "GLYPH · MUSIC" : "GLYPH"
         color: root.active ? Theme.text : Theme.textDim
         font.family: Theme.fontLabel
         font.pixelSize: 9
@@ -33,7 +34,6 @@ Rectangle {
     }
 
     Rectangle {
-        id: track
         anchors.right: parent.right
         anchors.rightMargin: Theme.gapM
         anchors.verticalCenter: parent.verticalCenter
@@ -62,6 +62,16 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: ShellState.caffeine = !ShellState.caffeine
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton) {
+                GlyphService.setMusic(!GlyphService.musicMode);
+            } else {
+                GlyphService.setEnabled(!GlyphService.enabled);
+                // Turning on shows what it does.
+                if (GlyphService.enabled)
+                    GlyphService.play("chase");
+            }
+        }
     }
 }

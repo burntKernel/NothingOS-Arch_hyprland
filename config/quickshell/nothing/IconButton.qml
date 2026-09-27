@@ -1,23 +1,32 @@
 import QtQuick
 
-// Square glyph button, with an optional red dot (e.g. unread notifications).
+// Square glyph button, with an optional red dot (e.g. unread notifications). Toggles set `active`,
+// which turns it white with a black glyph.
 Rectangle {
     id: root
 
     property string icon
     property bool badge: false
+    property bool active: false
 
     signal clicked
+    signal rightClicked
 
     implicitWidth: 44
     implicitHeight: 44
     radius: Theme.radiusCard
-    color: area.containsMouse ? Theme.surfaceHi : Theme.surface
+    color: active ? Theme.pill : area.containsMouse ? Theme.surfaceHi : Theme.surface
+
+    Behavior on color {
+        ColorAnimation {
+            duration: Theme.animFast
+        }
+    }
 
     Text {
         anchors.centerIn: parent
         text: root.icon
-        color: Theme.text
+        color: root.active ? Theme.pillText : Theme.text
         font.family: Theme.fontIcon
         font.pixelSize: 16
     }
@@ -38,6 +47,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: mouse => mouse.button === Qt.RightButton ? root.rightClicked() : root.clicked()
     }
 }

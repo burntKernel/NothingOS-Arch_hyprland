@@ -50,7 +50,10 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 monitor: Hyprland.monitorFor(bar.screen)
             }
-            WeatherChip {
+            BellChip {
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            RecordChip {
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

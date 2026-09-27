@@ -5,13 +5,15 @@ custom [Quickshell](https://quickshell.org) shell. Black surfaces, white text, o
 (`#D71921`), dot-matrix clocks, monochrome icons, and generated grainy geometric wallpapers.
 
 The base install is [JaKooLit's Hyprland-Dots](https://github.com/JaKooLit/Hyprland-Dots); everything
-here layers on top of it. Only four upstream files are touched, and those changes ship as patches.
+here layers on top of it. Only five upstream files are touched, and those changes ship as patches.
 
 ![Desktop: pill bar, calendar / bluetooth / media / screen-time widgets, Ndot clock, auto-hide dock](screenshots/desktop.png)
 
-| Control center (click the clock) | Power menu (Ctrl+Alt+P) |
+| Control center (click the clock) | Notifications (click the bell) |
 | --- | --- |
-| ![Control center](screenshots/control-center.png) | ![Power menu](screenshots/power-menu.png) |
+| ![Control center](screenshots/control-center.png) | ![Notifications](screenshots/notifications.png) |
+| **Lock screen** | **Power menu (Ctrl+Alt+P)** |
+| ![Lock screen](screenshots/lock-screen.png) | ![Power menu](screenshots/power-menu.png) |
 
 ## What is in here
 
@@ -22,7 +24,7 @@ here layers on top of it. Only four upstream files are touched, and those change
 | Hyprland scripts | `config/hypr/UserScripts/` | wallpaper generator + per-monitor apply, media-key OSD, idle suspend, overview toggle |
 | Idle / lock | `config/hypr/hypridle.conf`, `hyprlock.conf` | dim 5 min, lock 10, screens off 11, suspend 30 (on battery only); Ndot lock clock |
 | Launcher | `config/rofi/` | `nothing.rasi` list theme + `nothing-grid.rasi` 6x3 app grid (Super+D) |
-| Notifications | `config/swaync/style.css` | overrides swaync's stock CSS variables |
+| Notifications | `config/swaync/style.css` | overrides swaync's stock CSS variables; the widget list and position ship as `patches/swaync-config.json.patch` |
 | Terminal | `config/kitty/`, `config/starship.toml`, `config/fastfetch/`, `config/btop/`, `config/yazi/` | Lettera Mono, dot prompt, dot-matrix fetch logo, monochrome btop / yazi |
 | GTK / Qt | `config/gtk-3.0`, `gtk-4.0`, `Kvantum/Nothing`, `qt6ct`, `qt5ct` | adw-gtk3-dark + libadwaita colours, Kvantum theme, Qt colour scheme |
 | Static palette | `config/wallust/templates/` | wallust templates with fixed hex values, so KooL's wallpaper scripts keep writing the Nothing palette |
@@ -30,7 +32,7 @@ here layers on top of it. Only four upstream files are touched, and those change
 | Wallpapers | `wallpapers/`, `config/hypr/UserScripts/NothingWallpaper.py` | 5 compositions x dark/light at 1080p; generator renders any size |
 | Boot chain | `boot/` | Shared SDDM/Plymouth assets; use `boot/arch/install.sh` or `boot/fedora/install.sh` |
 | Apps | `apps/` | Zen browser userChrome, Obsidian CSS snippet, Chrome theme pack, Spotify (spicetify) theme in `config/spicetify` |
-| Upstream patches | `patches/` | the four JaKooLit files that had to change, as diffs |
+| Upstream patches | `patches/` | the five JaKooLit files that had to change, as diffs |
 | Shell rc | `shell/zshrc-nothing.zsh` | starship + fastfetch lines for `.zshrc` |
 
 ## Requirements
@@ -40,7 +42,9 @@ Tested on Arch Linux and Fedora 44, Hyprland 0.55, Quickshell 0.3.1 (git), Qt 6.
 - JaKooLit Hyprland-Dots (v2.3.19 or newer) already installed
 - `quickshell` (the COPR `quickshell-git` build; the packaged 0.3.0 crashed after Qt 6.11)
 - `hypridle`, `hyprlock`, `hyprsunset`, `swww`, `rofi` (2.x), `swaync`, `kitty`, `wallust`
-- `brightnessctl`, `wireplumber` (`wpctl`), `pavucontrol`, `blueman`, `nvtop` (GPU % in the stats card)
+- `brightnessctl`, `wireplumber` (`wpctl`), `pavucontrol`, `blueman`
+- `wf-recorder` (screen recorder), `hyprpicker` (colour picker), `grim` + `slurp` (screenshots), ImageMagick (colour swatch in the picker's notification, optional)
+- `cava` and `dbus-tools` (`dbus-monitor`) for the glyph lights' music mode and per-app notification patterns
 - `python3-pillow` (wallpapers, icons, fetch logo), `starship`, `fastfetch`, `btop`, `yazi`
 - `kvantum`, `qt6ct`, `qt5ct`, [adw-gtk3](https://github.com/lassekongo83/adw-gtk3) (in `~/.local/share/themes` or system-wide)
 - Cursor `Bibata-Modern-Ice`, base icon theme `Flat-Remix-Blue-Dark` (any theme works as the input to the generator)
@@ -140,11 +144,14 @@ After either distribution-specific installation, complete these shared steps:
 holds every colour, font, radius and timing, and `Config.qml` holds user settings (clock format,
 weather location, which output gets the widgets and the dock, OSD timing, backlight device, click actions).
 
-- **Bar**: floating black pill per monitor. Workspace dots, weather chip (Open-Meteo, located by IP unless you set lat/lon in `Config.qml`), clock, network, volume, battery. Click the clock for the control center.
-- **Control center**: Ndot clock, network / bluetooth tiles, volume, media card with waveform and album tint, night light (hyprsunset), CPU / RAM / GPU / temp, caffeine (idle inhibitor), lock / power / notifications.
+- **Bar**: floating black pill per monitor. Workspace dots, notification bell (click for the panel, right-click for do not disturb, red dot for unread), clock, network, volume, battery. Click the clock for the control center.
+- **Control center**: Ndot clock, network / bluetooth tiles, a sound output switcher, tall volume and brightness sliders (click the speaker to mute), a row of buttons (night light, caffeine, mic mute, screen recorder, screenshot, colour picker, lock, power), media card with waveform and album tint, glyph lights switch, phone remote switch. Right-click the recorder to record a region, the screenshot button for the whole screen. The pencil at the top right turns on edit mode: every tile, slider, button and card sits on an 8-column grid and can be dragged anywhere. An outline shows where it will land, same-size pieces swap, and anything else in the way moves down. Saved in `controlcenter.json` in the state dir; RESET restores the default. Spans and the default arrangement are in `CcLayout.qml`.
+- **Screen recorder**: `wf-recorder` with desktop audio, saved to `~/Videos/Recordings`. While it runs the bar shows a red REC timer; click it to stop, and a notification opens the video.
 - **Desktop widgets** (laptop screen, under windows): calendar tile, bluetooth tile, media, screen time (tracked by the shell itself, saved daily).
 - **Dock**: auto-hide bottom pill with monochrome icons; shows on empty workspaces or when the pointer dwells on the bottom edge. Right-click to pin / unpin.
 - **OSD**: dot-matrix volume / mic / brightness pill; media keys are rebound to `UserScripts/Volume.sh` and `Brightness.sh`.
+- **Glyph lights**: thin light strips along every screen's edges, after the Glyph Interface on Nothing phones. Notifications play a pattern chosen per app (`glyphPatterns` in `Config.qml`: pulse, double, chase, breathe, rise, sparkle or none); critical ones pulse red; nothing lights while do-not-disturb is on. The bottom strip is a progress bar for scripts, and a countdown for the timer card under the control center's glyph switch (5 / 15 / 25 / 45 minutes, +1 minute, stop; it ends with a chase and a notification). Music mode (right-click the control center tile) drives the strips from `cava`. The layer is click-through and unmapped whenever it's dark.
+- **Phone remote**: the control center tile for [hypr-remote](https://github.com/uzayr-iqbal-hamid/hypr-remote), a separate project that lets your phone control this desktop over home Wi-Fi (workspaces, windows, media, volume, clipboard, screen preview, touchpad). The switch starts and stops its `hypr-remote` systemd user service; while it runs, the tile shows the pairing QR code to scan with your phone. Without hypr-remote installed the tile says so and does nothing else.
 - **Power menu**: fullscreen, Ndot clock, Lock / Sleep / Log out / Restart / Shut down (destructive ones need a second press). `Ctrl+Alt+P`.
 
 IPC, from any terminal:
@@ -154,7 +161,13 @@ qs ipc -c nothing call controlcenter toggle|open|close
 qs ipc -c nothing call powermenu toggle|open|close|openOn <output>
 qs ipc -c nothing call dock toggle|open|close
 qs ipc -c nothing call caffeine toggle|get
+qs ipc -c nothing call recorder toggle|region|stop|get
 qs ipc -c nothing call osd volume|mic|brightness
+qs ipc -c nothing call glyph play pulse|double|chase|breathe|rise|sparkle|critical|done
+qs ipc -c nothing call glyph progress <0-100>     # 100 finishes with a flash
+qs ipc -c nothing call glyph timer <seconds>      # the bottom strip drains, then a chase
+qs ipc -c nothing call glyph demo|clear|toggle|get
+qs ipc -c nothing call glyph music true|false
 ```
 
 Quickshell hot-reloads edits. Adding a new `IpcHandler` needs a full restart of `qs -c nothing`.
